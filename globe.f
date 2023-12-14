@@ -137,6 +137,7 @@ c*****************************************************************
 10    continue
       write(*,'('' Enter npoints,T_lat,T_lon,R_lat,R_lon='',$)')
       read(*,*,end=999,err=999) npoints,tlat,tlon,rlat,rlon
+      if (npoints .le. 0) goto 999
       call get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,*900)
       write(*,101) nint(pfl(1)),pfl(2)
 101   format(i5,' points found, delta between points=',f10.2,' meters')

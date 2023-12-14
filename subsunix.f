@@ -32,10 +32,10 @@ c************************************************************
 c*************************************************************
       if(ionce.eq.0) then     !  read in names of the Globe data base files
 c          set directory path location to GLOBE data base
-         path='/disc3/globe/'        !  (unix systems use '/')
-	 nchp=13              !  number of characters in path
+         path='/home/ed/work/GLOBE/'        !  (unix systems use '/')
+	 nchp=20              !  number of characters in path
 	 lu_globe=61          !  FORTRAN unit number used to OPEN Globe files
-	 open(lu_globe,file=path(1:nchp)//'globe.dat',
+	 open(lu_globe,file=path(1:nchp)//'GLOBE.DAT',
      +         status='old',iostat=ios,err=920)
 	 rewind(lu_globe)
 	 read(lu_globe,'(a)') tiles(1)
@@ -94,9 +94,10 @@ c                  If you wish to do something different, do so in the routine.
 c**********************************************************************
       common /C_GLOBE_init/ lu_globe,path,nchp,tiles(16)
 	 character path*60,tiles*4
-      integer*2 data
+      integer*2 data!!, mask
       integer*4 byte1,byte2
       save last_tile
+      !!data mask/255/
       data last_tile/0/
 c********************************************************************
 c          do we need to open a new data file?
@@ -121,12 +122,12 @@ c***********************************************************
 c          For unix systems, 'data' MUST be byte swapped
 c          The following 3 lines should be uncommented for unix systems.
 c***********************************************************
-      byte1=iand(data,255)                !  byte swap for unix systems
-      byte2=ibits(data,8,8)               !  extract the upper 8 bits
+      !!byte1=iand(data,mask)                !  byte swap for unix systems
+      !!byte2=ibits(data,8,8)               !  extract the upper 8 bits
 cxxx      idata32=data                    !  if your FORTRAN does not have the
 cxxx      byte2=0                         !  function ibits, use mvbits
 cxxx      call mvbits(idata32,8,8,byte2,0)
-      data=byte1*256 + byte2              !  byte swap
+      !!data=byte1*256 + byte2              !  byte swap
 c***********************************************************
       if(data.eq.-500) data=0             !  ocean = 0
       elev=data
