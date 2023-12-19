@@ -39,8 +39,9 @@ c          set directory path location to GLOBE data base
      +         status='old',iostat=ios,err=920)
 	 rewind(lu_globe)
 	 read(lu_globe,'(a)') tiles(1)
-         do 10 i=1,16         !  read data for the 16 tiles
-10       read(lu_globe,'(a)') tiles(i)
+         do i=1,16         !  read data for the 16 tiles
+           read(lu_globe,'(a)') tiles(i)
+         end do
 	 close(lu_globe)
 	 ionce=1
       end if

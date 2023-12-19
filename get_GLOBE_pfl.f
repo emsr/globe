@@ -46,16 +46,18 @@ c          common block used by SUBROUTINE DAZEL to calculate great circle paths
       pfl(2)=delta*1000.D0                !  convert to meters
       pfl(3)=ztht
       pfl(npoints+2)=zrht
-      do 50 i=2,npoints-1
-      zdgc=dfloat(i-1)*delta
-      call dazel(1)                        !  calc ZRLAT,ZRLON
-      zz=GLOBE_elevation(zrlon,zrlat)      !  height at point
-      if(zz.lt.-500.) return 1             !  error in GLOBE data file
-50    pfl(i+2)=zz
+      do i=2,npoints-1
+        zdgc=dfloat(i-1)*delta
+        call dazel(1)                        !  calc ZRLAT,ZRLON
+        zz=GLOBE_elevation(zrlon,zrlat)      !  height at point
+        if(zz.lt.-500.) return 1             !  error in GLOBE data file
+        pfl(i+2)=zz
+      end do
       return
-      end
+      end subroutine
+
 c-------------------------------------------------------
-       subroutine DAZEL(MODE)
+      SUBROUTINE DAZEL(MODE)
 C#  SUB DAZEL(MODE)             Great circle calculations.
        IMPLICIT DOUBLE PRECISION(A-L,N-Y)
 C
@@ -110,145 +112,156 @@ C
       DATA PI/3.141592653589793238462643D0/,RERTH/6370.0D0/
       DATA DTOR/0.01745329252D0/,RTOD/57.29577951D0/
       IF(MODE .EQ. 1) GO TO 200
-       TLATS=ZTLAT
-       TLONS=ZTLON
-       THTS=ZTHT*1.0E-3
-       RLATS=ZRLAT
-       RLONS=ZRLON
-       RHTS=ZRHT*1.0E-3
-       IF(TLATS.le.-90.0) tlats=-89.99
-       IF(TLATS.ge. 90.0) tlats= 89.99
-       IF(RLATS.le.-90.0) rlats=-89.99
-       IF(RLATS.ge. 90.0) rlats= 89.99
-       DELAT=RLATS-TLATS
-       ADLAT=DABS(DELAT)
-       DELON=RLONS-TLONS
-       IF(DELON-(-180.0))12,16,16
-12     DELON=DELON+360.0
-       IF(DELON-(-180.0))12,20,20
-16     IF(DELON-180.0)20,20,18
-18     DELON=DELON-360.0
-       IF(DELON-180.0)20,20,18
-20     ADLON=DABS(DELON)
-       DELHT=RHTS-THTS
-       IF(ADLON-1.0E-5)22,22,55
-22     IF(ADLAT-1.0E-5)24,24,40
-C
-C   POINTS T AND R HAVE THE SAME COORDINATES
-C
-24     ZTAZ=0.0
-       ZRAZ=0.0
-       IF(DELHT)25,30,35
-25     ZTELV=-90.0
-       ZRELV=90.0
-       ZD=-DELHT
-      ZDGC=0.0
-       RETURN
-30     ZTELV=0.0
-       ZRELV=0.0
-       ZD=0.0
-      ZDGC=0.0
-       RETURN
-35     ZTELV=90.0
-       ZRELV=-90.0
-       ZD=DELHT
-      ZDGC=0.0
-       RETURN
-C
-C   POINTS T AND R HAVE SAME LONGITUDE, DISTINCT LATITUDES
-C
-40     IF(DELAT-0.0)42,42,45
-42     ZTAZ=180.0
-       ZRAZ=0.0
-       GO TO 50
-45     ZTAZ=0.0
-       ZRAZ=180.0
-50     GC=ADLAT*DTOR
-       SGC=DSIN(0.5*GC)
-       D=DSQRT(DELHT*DELHT+4.0*(RERTH+THTS)*(RERTH+RHTS)*SGC*SGC)
-      ZD=D
-       GO TO 140
-C
-C   POINTS TAND R HAVE DISTINCT LONGITUDES
-C
-55     IF(DELON-0.0)56,56,60
-56     WLAT=RLATS*DTOR
-       ELAT=TLATS*DTOR
-       GO TO 65
-60     WLAT=TLATS*DTOR
-       ELAT=RLATS*DTOR
-C
-C   CALCULATE AZIMUTHS AT POINTS W AND E
-C
-65     SDLAT=DSIN(0.5*ADLAT*DTOR)
-       SDLON=DSIN(0.5*ADLON*DTOR)
-       SADLN=DSIN(ADLON*DTOR)
-       CWLAT=DCOS(WLAT)
-       CELAT=DCOS(ELAT)
-       P=2.0*(SDLAT*SDLAT+SDLON*SDLON*CWLAT*CELAT)
-       SGC=DSQRT(P*(2.0-P))
-       SDLAT=DSIN(ELAT-WLAT)
-       CWAZ=(2.0*CELAT*DSIN(WLAT)*SDLON*SDLON+SDLAT)/SGC
+      TLATS=ZTLAT
+      TLONS=ZTLON
+      THTS=ZTHT*1.0E-3
+      RLATS=ZRLAT
+      RLONS=ZRLON
+      RHTS=ZRHT*1.0E-3
+      IF(TLATS.LE.-90.0) TLATS=-89.99
+      IF(TLATS.GE. 90.0) TLATS= 89.99
+      IF(RLATS.LE.-90.0) RLATS=-89.99
+      IF(RLATS.GE. 90.0) RLATS= 89.99
+      DELAT=RLATS-TLATS
+      ADLAT=DABS(DELAT)
+      DELON=RLONS-TLONS
+      DO WHILE (DELON .LT. -180.0)
+        DELON=DELON+360.0
+      END DO
+      DO WHILE (DELON .GT. 180.0)
+        DELON=DELON-360.0
+      END DO
+      ADLON=DABS(DELON)
+      DELHT=RHTS-THTS
+      IF(ADLON .LE. 1.0E-5) THEN
+        IF(ADLAT .LE. 1.0E-5) THEN
+          !
+          !   POINTS T AND R HAVE THE SAME COORDINATES
+          !
+          ZTAZ=0.0
+          ZRAZ=0.0
+          IF (DELHT .LT. 0.0) THEN
+            ZTELV=-90.0
+            ZRELV=90.0
+            ZD=-DELHT
+            ZDGC=0.0
+            RETURN
+          ELSE IF (DELHT .EQ. 0.0) THEN
+            ZTELV=0.0
+            ZRELV=0.0
+            ZD=0.0
+            ZDGC=0.0
+            RETURN
+          ELSE
+            ZTELV=90.0
+            ZRELV=-90.0
+            ZD=DELHT
+            ZDGC=0.0
+            RETURN
+          END IF
+        ELSE
+          !
+          !   POINTS T AND R HAVE SAME LONGITUDE, DISTINCT LATITUDES
+          !
+          IF (DELAT .LE. 0.0) THEN
+            ZTAZ=180.0
+            ZRAZ=0.0
+          ELSE
+            ZTAZ=0.0
+            ZRAZ=180.0
+          END IF
+          GC=ADLAT*DTOR
+          SGC=DSIN(0.5*GC)
+          D=DSQRT(DELHT*DELHT+4.0*(RERTH+THTS)*(RERTH+RHTS)*SGC*SGC)
+          ZD=D
+          GO TO 140
+        END IF
+      ELSE
+        !
+        !   POINTS T AND R HAVE DISTINCT LONGITUDES
+        !
+        IF (DELON .LE. 0.0) THEN
+          WLAT=RLATS*DTOR
+          ELAT=TLATS*DTOR
+        ELSE
+          WLAT=TLATS*DTOR
+          ELAT=RLATS*DTOR
+        END IF
+      END IF
+      !
+      !   CALCULATE AZIMUTHS AT POINTS W AND E
+      !
+      SDLAT=DSIN(0.5*ADLAT*DTOR)
+      SDLON=DSIN(0.5*ADLON*DTOR)
+      SADLN=DSIN(ADLON*DTOR)
+      CWLAT=DCOS(WLAT)
+      CELAT=DCOS(ELAT)
+      P=2.0*(SDLAT*SDLAT+SDLON*SDLON*CWLAT*CELAT)
+      SGC=DSQRT(P*(2.0-P))
+      SDLAT=DSIN(ELAT-WLAT)
+      CWAZ=(2.0*CELAT*DSIN(WLAT)*SDLON*SDLON+SDLAT)/SGC
       SWAZ=SADLN*CELAT/SGC
       WAZ=DATAN2(SWAZ,CWAZ)*RTOD
-       CEAZ=(2.0*CWLAT*DSIN(ELAT)*SDLON*SDLON-SDLAT)/SGC
+      CEAZ=(2.0*CWLAT*DSIN(ELAT)*SDLON*SDLON-SDLAT)/SGC
       SEAZ=SADLN*CWLAT/SGC
       EAZ=DATAN2(SEAZ,CEAZ)*RTOD
-       EAZ=360.0-EAZ
-       IF(DELON.le.0.0) then
-          ZTAZ=EAZ
-          ZRAZ=WAZ
-       else
-          ZTAZ=WAZ
-          ZRAZ=EAZ
-       end if
-C
-C
-C   COMPUTE THE STRAIGHT LINE DISTANCE AND GREAT CIRCLE ANGLE BETWEEN T AND R
-C
-       D=DSQRT(DELHT*DELHT+2.0*(RERTH+THTS)*(RERTH+RHTS)*P)
+      EAZ=360.0-EAZ
+      IF (DELON .LE. 0.0) THEN
+        ZTAZ=EAZ
+        ZRAZ=WAZ
+      ELSE
+        ZTAZ=WAZ
+        ZRAZ=EAZ
+      END IF
+      !
+      !   COMPUTE THE STRAIGHT LINE DISTANCE AND GREAT CIRCLE ANGLE BETWEEN T AND R
+      !
+      D=DSQRT(DELHT*DELHT+2.0*(RERTH+THTS)*(RERTH+RHTS)*P)
       ZD=D
-       CGC=1.0-P
+      CGC=1.0-P
       GC=DATAN2(SGC,CGC)
-C
-C   COMPUTE GREAT CIRCLE DISTANCE AND ELEVATION ANGLES
-C
+      !
+      !   COMPUTE GREAT CIRCLE DISTANCE AND ELEVATION ANGLES
+      !
 140   ZDGC=GC*RERTH
-142    IF(DELHT .GE. 0) GOTO 145
-       AHT=THTS
-       BHT=RHTS
-       GO TO 150
-145    AHT=RHTS
-       BHT=THTS
-150    SAELV=0.5*(D*D+DABS(DELHT)*(RERTH+AHT+RERTH+BHT))/(D*(RERTH+AHT))
+142   IF (DELHT .LT. 0.0) THEN
+        AHT=THTS
+        BHT=RHTS
+      ELSE
+        AHT=RHTS
+        BHT=THTS
+      END IF
+      SAELV=0.5*(D*D+DABS(DELHT)*(RERTH+AHT+RERTH+BHT))/(D*(RERTH+AHT))
       ARG=DMAX1(0.0D0,(1.0D0-SAELV*SAELV))
-       AELV=DATAN2(SAELV,DSQRT(ARG))
-       BELV=(AELV-GC)*RTOD
-       AELV=-AELV*RTOD
+      AELV=DATAN2(SAELV,DSQRT(ARG))
+      BELV=(AELV-GC)*RTOD
+      AELV=-AELV*RTOD
 C   COMPUTE TAKE-OFF ANGLES ASSUMING 4/3 EARTH RADIUS
-       R4THD=RERTH*4.0/3.0
-       GC=0.75*GC
-       SGC=DSIN(0.5*GC)
-       P=2.0*SGC*SGC
-       AALT=R4THD+AHT
-       BALT=R4THD+BHT
-       DA=DSQRT(DELHT*DELHT+2.0*AALT*BALT*P)
-       SAELV=0.5*(DA*DA+DABS(DELHT)*(AALT+BALT))/(DA*AALT)
+      R4THD=RERTH*4.0/3.0
+      GC=0.75*GC
+      SGC=DSIN(0.5*GC)
+      P=2.0*SGC*SGC
+      AALT=R4THD+AHT
+      BALT=R4THD+BHT
+      DA=DSQRT(DELHT*DELHT+2.0*AALT*BALT*P)
+      SAELV=0.5*(DA*DA+DABS(DELHT)*(AALT+BALT))/(DA*AALT)
       ARG=DMAX1(0.0D0,(1.0D0-SAELV*SAELV))
-       ATAKOF=DATAN(SAELV/DSQRT(ARG))
-       BTAKOF=(ATAKOF-GC)*RTOD
-       ATAKOF=-ATAKOF*RTOD
-       IF(DELHT-0.0)151,155,155
-151    ZTELV=AELV
-       ZRELV=BELV
-       ZTAKOF=ATAKOF
-       ZRAKOF=BTAKOF
-       RETURN
-155    ZTELV=BELV
-       ZRELV=AELV
-       ZTAKOF=BTAKOF
-       ZRAKOF=ATAKOF
-       RETURN
+      ATAKOF=DATAN(SAELV/DSQRT(ARG))
+      BTAKOF=(ATAKOF-GC)*RTOD
+      ATAKOF=-ATAKOF*RTOD
+      IF (DELHT .LT. 0.0) THEN
+        ZTELV=AELV
+        ZRELV=BELV
+        ZTAKOF=ATAKOF
+        ZRAKOF=BTAKOF
+        RETURN
+      ELSE
+        ZTELV=BELV
+        ZRELV=AELV
+        ZTAKOF=BTAKOF
+        ZRAKOF=ATAKOF
+        RETURN
+      END IF
 C
 C     COMPUTE END POINT GIVEN DISTANCE AND BEARING
 C
@@ -278,5 +291,5 @@ C
       SGC=DSIN(0.5*GC)
       D=DSQRT(DELHT*DELHT+4.0*(RERTH+THTS)*(RERTH+RHTS)*SGC*SGC)
       GO TO 142
-      END
+      END SUBROUTINE
 C------------------------------------------------------------------
