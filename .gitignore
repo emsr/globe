@@ -1,2 +1,9 @@
 
 globe
+
+libglobe.so
+test_globe
+test_globepp
+
+globe_wrap.o
+globe.mod
