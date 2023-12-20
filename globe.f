@@ -118,6 +118,8 @@ c*****************************************************************
      + 1671.,1679.,1683.,1694.,1705.,1715.,1724.,1733.,1744.,1749.,
      + 1764.,1803.,1839.,1839.,1860.,1871.,1890.,1900.,1916.,1943.,
      + 1975./
+      integer ierror
+      ierror = 0
       Tx_lat=40.25         !  Transmitter Latitude
       Tx_lon=-105.         !  Transmitter Longitude
       Rx_lat=41.25         !  Receiver    Latitude
@@ -127,28 +129,30 @@ c*****************************************************************
       tlon=Tx_lon
       rlat=Rx_lat
       rlon=Rx_lon
-      write(*,*) 'Sample input: 101, 40, -105, 41, -105'
-      write(*,*) 'Should produce the results:'
-      write(*,101) 101,1111.77
-      write(*,102)
-      write(*,103) sample
-      write(*,*) 'Please compare your results to those above.'
-      write(*,*)
+      write(6,*) 'Sample input: 101, 40, -105, 41, -105'
+      write(6,*) 'Should produce the results:'
+      write(6,101) 101,1111.77
+      write(6,102)
+      write(6,103) sample
+      write(6,*) 'Please compare your results to those above.'
+      write(6,*)
 10    continue
-      write(*,'('' Enter npoints,T_lat,T_lon,R_lat,R_lon='',$)')
+      write(6,'('' Enter npoints,T_lat,T_lon,R_lat,R_lon='',$)')
       read(*,*,end=999,err=999) npoints,tlat,tlon,rlat,rlon
       if (npoints .le. 0) goto 999
-      call get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,*900)
-      write(*,101) nint(pfl(1)),pfl(2)
+      call get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,ierror)
+      if (ierror .ne. 0) then
+        write(6,901)
+      end if
+      write(6,101) nint(pfl(1)),pfl(2)
 101   format(i5,' points found, delta between points=',f10.2,' meters')
-      write(*,102)
+      write(6,102)
 102   format(' Elevation profile in meters:')
-      write(*,103) (pfl(i+2),i=1,npoints)
+      write(6,103) (pfl(i+2),i=1,npoints)
 103   format(10f7.0)
 ccc      write(15,104) (i-1,float(i-1),pfl(i+2),i=1,npoints)
 ccc104   format(3(i5,f10.2,f9.0,2x))
       go to 10
-900   write(*,901)
 901   format('Error in get_GLOBE_pfl')
       go to 10
 999   continue

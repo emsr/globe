@@ -1,4 +1,4 @@
-      subroutine get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,*)
+      subroutine get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,ierror)
 c*****************************************************************
 c          WARNING: there is some code that MUST be changed depending on your
 c                   computer system.  This is because the GLOBE data base is
@@ -29,13 +29,21 @@ c          for the NOAA's Globe Ver 1.0 elevation data
 c*****************************************************************
       dimension pfl(*)
       real*8 delta
+      integer ierror
 c          common block used by SUBROUTINE DAZEL to calculate great circle paths
       COMMON/AZEL/ ZTLAT,ZTLON,ZTHT,ZRLAT,ZRLON,ZRHT,ZTAZ,ZRAZ,
      * ZTELV,ZRELV,ZD,ZDGC,ZTAKOF,ZRAKOF
+      ierror = 0
       ztht=GLOBE_elevation(tlon,tlat)           !  height at Tx
-      if(ztht.lt.-500.) return 1                !  error in GLOBE data file
+      if(ztht.lt.-500.) then ! error in GLOBE data file
+        ierror = 1
+        return
+      end if
       zrht=GLOBE_elevation(rlon,rlat)           !  height at Rx
-      if(zrht.lt.-500.) return 1                !  error in GLOBE data file
+      if(zrht.lt.-500.) then ! error in GLOBE data file
+        ierror = 2
+        return
+      end if
       ztlat=tlat
       ztlon=tlon
       zrlat=rlat
@@ -50,7 +58,10 @@ c          common block used by SUBROUTINE DAZEL to calculate great circle paths
         zdgc=dfloat(i-1)*delta
         call dazel(1)                        !  calc ZRLAT,ZRLON
         zz=GLOBE_elevation(zrlon,zrlat)      !  height at point
-        if(zz.lt.-500.) return 1             !  error in GLOBE data file
+        if(zz.lt.-500.) then ! error in GLOBE data file
+          ierror = i+2
+          return
+        end if
         pfl(i+2)=zz
       end do
       return

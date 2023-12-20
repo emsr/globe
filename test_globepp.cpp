@@ -28,15 +28,17 @@ main()
   cout << "Enter num pts: ";
   cin >> num_pts;
 
-  cout << "tx_lat : " << tx_lat << '\n';
-  cout << "tx_lon : " << tx_lon << '\n';
-  cout << "rx_lat : " << rx_lat << '\n';
-  cout << "rx_lon : " << rx_lon << '\n';
-  cout << "num_pts: " << num_pts << '\n';
+  cout << "tx_lat  : " << tx_lat << '\n';
+  cout << "tx_lon  : " << tx_lon << '\n';
+  cout << "rx_lat  : " << rx_lat << '\n';
+  cout << "rx_lon  : " << rx_lon << '\n';
+  cout << "num_pts : " << num_pts << '\n';
 
   float prfl[2000];
-  get_profile (tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl);
+  int ierror = 0;
+  get_profile (tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl, &ierror);
 
+  cout << "ierror  : " << ierror << '\n';
   cout << "num_pts : " << int(prfl[0]) << '\n';
   cout << "delta   : " << prfl[1] << '\n';
   for (int i = 0; i < num_pts; ++i)

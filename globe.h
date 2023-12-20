@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 int elevation (float lat, float lon);
-void get_profile (float tx_lat, float tx_lon, float rx_lat, float rx_lon, int num_pts, float *prfl);
+void get_profile (float tx_lat, float tx_lon, float rx_lat, float rx_lon, int num_pts, float *prfl, int *ierror);
 
 #ifdef __cplusplus
 }

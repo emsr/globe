@@ -11,7 +11,7 @@ contains
   ! Fill a terrain profile - elevation as a function of distance array
   ! for the given transmitter and receiver latitudes and longitudes.
   !
-  subroutine get_profile(tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl) bind(c)
+  subroutine get_profile(tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl, ierror) bind(c)
 
     use iso_c_binding
 
@@ -19,11 +19,13 @@ contains
     real(c_float), value :: tx_lat, tx_lon, rx_lat, rx_lon
     integer(c_int), value :: num_pts
     real(c_float) :: prfl(3 + num_pts)
+    integer(c_int) :: ierror
+    1 format('Error in get_GLOBE_pfl at', i3)
 
-    call get_globe_pfl(tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl, *900)
-    900 write(*,901)
-    901 format('Error in get_GLOBE_pfl')
-
+    call get_globe_pfl(tx_lat, tx_lon, rx_lat, rx_lon, num_pts, prfl, ierror)
+    if (ierror .ne. 0) then
+      write(6, 1) ierror
+    end if
   end subroutine
 
   !

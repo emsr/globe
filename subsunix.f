@@ -24,19 +24,18 @@ c          corresponds to latitude=-89.9916666666...,
 c          which is NOT the South Pole, and the values at
 c          different longitude are slightly different.
 c************************************************************
-      common /C_GLOBE_init/ lu_globe,path,nchp,tiles(16)
+      common /C_GLOBE_init/ lu_globe,path,tiles(16)
 	 character path*60,tiles*4
       dimension z(4)
       save ionce
       data ionce/0/
 c*************************************************************
       if(ionce.eq.0) then     !  read in names of the Globe data base files
-c          set directory path location to GLOBE data base
-         path='/home/ed/work/GLOBE/'        !  (unix systems use '/')
-	 nchp=20              !  number of characters in path
-	 lu_globe=61          !  FORTRAN unit number used to OPEN Globe files
-	 open(lu_globe,file=path(1:nchp)//'GLOBE.DAT',
-     +         status='old',iostat=ios,err=920)
+         ! set directory path location to GLOBE data base
+         path='/home/ed/work/GLOBE/' !  (unix systems use '/')
+	 lu_globe=61                 !  FORTRAN unit number used to OPEN Globe files
+	 open(lu_globe,file=trim(path)//'GLOBE.DAT',
+     +        status='old',iostat=ios,err=920)
 	 rewind(lu_globe)
 	 read(lu_globe,'(a)') tiles(1)
          do i=1,16         !  read data for the 16 tiles
@@ -72,10 +71,11 @@ c          file does not exist
 900   elevation =-501.                  !  flag invalid elevation value
 910   GLOBE_elevation=nint(elevation)
       return
-920   write(*,921) ios,path(1:nchp)//'globe.dat'
+920   write(*,921) ios,trim(path)//'globe.dat'
 921   format(' OPEN error=',i5,' file=',a)
       stop 'OPEN error in  GLOBE_elevation'
       end
+
 c-----------------------------------------------------------------
       subroutine get_GLOBE_data(itile,irec,elev,*)
 c**********************************************************************
@@ -93,7 +93,7 @@ c                  The GLOBE database contains -500 to signify ocean.
 c                  That value is converted to 0.
 c                  If you wish to do something different, do so in the routine.
 c**********************************************************************
-      common /C_GLOBE_init/ lu_globe,path,nchp,tiles(16)
+      common /C_GLOBE_init/ lu_globe,path,tiles(16)
 	 character path*60,tiles*4
       integer*2 data!!, mask
       integer*4 byte1,byte2
@@ -104,7 +104,7 @@ c********************************************************************
 c          do we need to open a new data file?
       if(last_tile.ne.itile) then       !  open a new GLOBE file
          if(last_tile.ne.0) close(lu_globe)
-         open(lu_globe,file=path(1:nchp)//tiles(itile),
+         open(lu_globe,file=trim(path)//tiles(itile),
      +        access='direct',recl=2,status='old',iostat=ios,err=900)
 	 last_tile=itile
       end if
@@ -136,7 +136,7 @@ c***********************************************************
 c***********************************************************
       return
 900   last_tile=0
-      write(*,901) ios,path(1:nchp)//tiles(itile)
+      write(*,901) ios,trim(path)//tiles(itile)
 901   format(' OPEN error=',i5,' file=',a)
       return 1
 910   continue
