@@ -74,7 +74,6 @@ c  For unix systems:
 c   3. Modify subsunix.f to define the GLOBE data directory.
 c      This is contained in the 3 lines:
 c          path='/disc3/terrain2/globe/'  !  directory containing GLOBE data
-c          nchp=22                        !  # characters in path
 c          lu_globe=61                    !  FORTRAN unit number to use
 c   4. Combine the source code files:
 c          globe.f get_GLOBE_pfl.f subsunix.f
@@ -87,7 +86,6 @@ c  For PC systems:
 c   3. Modify subspc.f to define the GLOBE data directory.
 c      This is contained in the 3 lines:
 c          path='E:\globe\'               !  directory containing GLOBE data
-c          nchp=9                         !  # characters in path
 c          lu_globe=61                    !  FORTRAN unit number to use
 c   4. Combine the source code files:
 c          globe.f get_GLOBE_pfl.f subsunix.f
@@ -138,7 +136,7 @@ c*****************************************************************
       write(6,*)
 10    continue
       write(6,'('' Enter npoints,T_lat,T_lon,R_lat,R_lon='',$)')
-      read(*,*,end=999,err=999) npoints,tlat,tlon,rlat,rlon
+      read(5,*,end=999,err=999) npoints,tlat,tlon,rlat,rlon
       if (npoints .le. 0) goto 999
       call get_GLOBE_pfl(tlat,tlon,rlat,rlon,npoints,pfl,ierror)
       if (ierror .ne. 0) then

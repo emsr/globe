@@ -71,7 +71,7 @@ c          file does not exist
 900   elevation =-501.                  !  flag invalid elevation value
 910   GLOBE_elevation=nint(elevation)
       return
-920   write(*,921) ios,trim(path)//'globe.dat'
+920   write(*,921) ios,trim(path)//'GLOBE.DAT'
 921   format(' OPEN error=',i5,' file=',a)
       stop 'OPEN error in  GLOBE_elevation'
       end
