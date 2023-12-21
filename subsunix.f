@@ -71,7 +71,7 @@ c          file does not exist
 900   elevation =-501.                  !  flag invalid elevation value
 910   GLOBE_elevation=nint(elevation)
       return
-920   write(*,921) ios,trim(path)//'GLOBE.DAT'
+920   write(6,921) ios,trim(path)//'GLOBE.DAT'
 921   format(' OPEN error=',i5,' file=',a)
       stop 'OPEN error in  GLOBE_elevation'
       end
@@ -110,7 +110,7 @@ c          do we need to open a new data file?
       end if
 c********************************************************************
       read(lu_globe,rec=irec,err=910) data
-ccc      write(*,'('' data='',i10)') data
+ccc      write(6,'('' data='',i10)') data
 c***********************************************************
 c***********************************************************
 c          The following line should be commented when you change the
@@ -136,11 +136,11 @@ c***********************************************************
 c***********************************************************
       return
 900   last_tile=0
-      write(*,901) ios,trim(path)//tiles(itile)
+      write(6,901) ios,trim(path)//tiles(itile)
 901   format(' OPEN error=',i5,' file=',a)
       return 1
 910   continue
-      write(*,'(''Filename='',a,''  irec='',i10)') tiles(itile),irec
+      write(6,'(''Filename='',a,''  irec='',i10)') tiles(itile),irec
       stop 'Should not get here in get_GLOBE_data'
       end
 c-----------------------------------------------------------------
